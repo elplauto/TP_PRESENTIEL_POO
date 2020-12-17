@@ -13,7 +13,7 @@ public class Canal implements Destinataire, Comparable<Canal> {
 	private String nom;
 	private Map<Role, List<Habilitation>> mapping_role_habilitations;
 	private List<Message> historiques;
-	
+
 	public Canal() {
 		this.mapping_role_habilitations = new HashMap<Role, List<Habilitation>>();
 		this.mapping_role_utilisateurs = new HashMap<Role, List<Utilisateur>>();
@@ -70,22 +70,11 @@ public class Canal implements Destinataire, Comparable<Canal> {
 
 	public void ecrireMessage(Utilisateur utilisateur, Message message) throws ActionNonAutoriseeException {
 
-		boolean permissionAccordee = false;
 		// recuperation des roles de l'utilisateur
-		List<Role> roles = new ArrayList<Role>();
-		for (Role r : mapping_role_utilisateurs.keySet()) {
-			if (mapping_role_utilisateurs.get(r).contains(utilisateur)) {
-				roles.add(r);
-			}
-		}
+		List<Role> roles = getRolesUtilisateurs(utilisateur);
 
 		// verification qu'un des roles possede le droit d'ecriture
-		for (Role r : roles) {
-			if (mapping_role_habilitations.get(r).contains(Habilitation.ECRITURE)) {
-				permissionAccordee = true;
-				break;
-			}
-		}
+		boolean permissionAccordee = verifierDroitEcriture(roles);
 
 		if (permissionAccordee) {
 			historiques.add(message);
@@ -93,6 +82,27 @@ public class Canal implements Destinataire, Comparable<Canal> {
 			throw new ActionNonAutoriseeException("erreur");
 		}
 
+	}
+
+	private List<Role> getRolesUtilisateurs(Utilisateur utilisateur) {
+		List<Role> roles = new ArrayList<Role>();
+		for (Role r : mapping_role_utilisateurs.keySet()) {
+			if (mapping_role_utilisateurs.get(r).contains(utilisateur)) {
+				roles.add(r);
+			}
+		}
+		return roles;
+	}
+
+	// retourne vrai si au moins un des roles de la liste passée en paramètre
+	// possède le droit d'écriture
+	private Boolean verifierDroitEcriture(List<Role> roles) {
+		for (Role r : roles) {
+			if (mapping_role_habilitations.get(r).contains(Habilitation.ECRITURE)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public int compareTo(Canal o) {

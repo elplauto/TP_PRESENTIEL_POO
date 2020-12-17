@@ -71,6 +71,7 @@ public class testCanal {
     	
     	//c1 doit etre avant c2 donc < 0
     	Assert.assertTrue(c1.compareTo(c2) < 0);
+
     }
 
 }
